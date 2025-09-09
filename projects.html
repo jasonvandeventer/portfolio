@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Projects | Jason VanDeventer</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <body>
+    <header class="nav container">
+      <div class="brand"><a href="/">vanfreckle.com</a></div>
+      <nav>
+        <a href="/projects.html">Projects</a>
+        <a href="/resume.html">Résumé</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+    </header>
+
+    <main class="container grid">
+      <h1>Projects</h1>
+      <p class="text-muted">Concise, recruiter-focused case studies.</p>
+
+      <!-- Case Study Template: replace the text but keep the headings -->
+      <article class="card">
+        <h2>AWS Capstone: Cost-Conscious Web Stack</h2>
+        <h3>Problem</h3>
+        <p class="text-muted">
+          Host a demoable stack with very low cost and clean IaC.
+        </p>
+        <h3>Approach</h3>
+        <p class="text-muted">
+          Terraform, GitHub OIDC to AWS; S3 + CloudFront; Route53 + ACM; cost
+          levers.
+        </p>
+        <h3>Tech</h3>
+        <p class="text-muted">
+          Terraform, AWS (IAM, S3, CloudFront, Route53, ACM), GitHub Actions.
+        </p>
+        <h3>Outcomes</h3>
+        <p class="text-muted">
+          Live demo, IaC repo, HTTPS, cost below personal budget targets.
+        </p>
+        <p>
+          <a
+            href="https://github.com/jasonvandeventer/portfolio-case-studies"
+            target="_blank"
+            >Case Study Repo</a
+          >
+        </p>
+      </article>
+
+      <article class="card">
+        <h2>Homelab Media Stack</h2>
+        <h3>Problem</h3>
+        <p class="text-muted">
+          Reliable home media pipeline with automation and reverse proxy.
+        </p>
+        <h3>Approach</h3>
+        <p class="text-muted">
+          Docker Compose for Plex/*arr, SABnzbd, qBittorrent; NPM; Homarr.
+        </p>
+        <h3>Tech</h3>
+        <p class="text-muted">
+          Docker, Compose, Nginx Proxy Manager, Homarr, VAAPI on Intel ARC A380.
+        </p>
+        <h3>Outcomes</h3>
+        <p class="text-muted">
+          Single-VM stack, GPU transcoding, dashboard, documented configs.
+        </p>
+        <p>
+          <a
+            href="https://github.com/jasonvandeventer/portfolio-case-studies"
+            target="_blank"
+            >Case Study Repo</a
+          >
+        </p>
+      </article>
+    </main>
+
+    <footer>
+      <div class="container">© <span id="yr"></span> Jason VanDeventer</div>
+      <script>
+        document.getElementById("yr").textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  </body>
+</html>

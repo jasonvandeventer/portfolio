@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jason VanDeventer | Portfolio</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <body>
+    <header class="nav container">
+      <div class="brand"><a href="/">vanfreckle.com</a></div>
+      <nav>
+        <a href="/projects.html">Projects</a>
+        <a href="/resume.html">Résumé</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+    </header>
+
+    <main class="container grid hero">
+      <section class="card">
+        <h1>Jason VanDeventer</h1>
+        <p class="text-muted">
+          Cloud Support / Cloud Systems Admin • AWS SAA • Secret Clearance
+        </p>
+        <p class="text-muted">Tulsa, OK (Remote-friendly)</p>
+        <ul class="inline">
+          <li><a class="btn" href="/projects.html">Projects</a></li>
+          <li><a class="btn" href="/resume.html">Résumé (PDF)</a></li>
+          <li>
+            <a
+              class="btn"
+              href="https://www.linkedin.com/in/jasonvandeventer"
+              target="_blank"
+              >LinkedIn</a
+            >
+          </li>
+          <li>
+            <a
+              class="btn"
+              href="https://github.com/jasonvandeventer"
+              target="_blank"
+              >GitHub</a
+            >
+          </li>
+        </ul>
+      </section>
+
+      <section class="grid projects">
+        <article class="card">
+          <h2>AWS Capstone: Cost-Conscious Web Stack</h2>
+          <p>
+            Terraform + GitHub OIDC • Route53/ACM • S3 + CloudFront • Cost
+            controls.
+          </p>
+          <ul class="inline">
+            <li>
+              <a
+                href="https://github.com/jasonvandeventer/portfolio-case-studies"
+                target="_blank"
+                >Case Study Repo</a
+              >
+            </li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Homelab Media Stack</h2>
+          <p>Docker Compose • Plex/*arr • Nginx Proxy Manager • Homarr.</p>
+          <ul class="inline">
+            <li>
+              <a
+                href="https://github.com/jasonvandeventer/portfolio-case-studies"
+                target="_blank"
+                >Case Study Repo</a
+              >
+            </li>
+          </ul>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">© <span id="yr"></span> Jason VanDeventer</div>
+      <script>
+        document.getElementById("yr").textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  </body>
+</html>

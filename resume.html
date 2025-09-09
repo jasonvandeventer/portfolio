@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Résumé | Jason VanDeventer</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <body>
+    <header class="nav container">
+      <div class="brand"><a href="/">vanfreckle.com</a></div>
+      <nav>
+        <a href="/projects.html">Projects</a>
+        <a href="/resume.html">Résumé</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+    </header>
+
+    <main class="container grid">
+      <h1>Résumé</h1>
+      <section class="card">
+        <p>Download the latest résumé PDF:</p>
+        <p>
+          <a
+            class="btn"
+            href="/resume/Jason_VanDeventer_CloudSupport.pdf"
+            target="_blank"
+            >Cloud Support / SysAdmin résumé (PDF)</a
+          >
+        </p>
+        <p class="text-muted">
+          Keep the filename stable so inbound links never break.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">© <span id="yr"></span> Jason VanDeventer</div>
+      <script>
+        document.getElementById("yr").textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  </body>
+</html>

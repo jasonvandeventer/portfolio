@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mana Archive Platform | Jason VanDeventer</title>
+  <meta name="description" content="Case study for the Mana Archive Platform: Kubernetes deployment, GHCR, Traefik ingress, and PVC-backed SQLite persistence." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a href="../index.html" class="brand">vanfreckle<span>.com</span></a>
+      <nav>
+        <a href="../index.html">Home</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#lessons">Lessons</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="project-page">
+    <section class="section">
+      <div class="container narrow">
+        <p class="section-label">Featured project</p>
+        <h1>Mana Archive Platform</h1>
+        <p class="lede">
+          I rebuilt this project from the ground up to force understanding instead of relying on a messy “it works somehow” setup.
+          The result is a reproducible workflow: local app runtime, containerization, image publishing, Kubernetes delivery,
+          ingress routing, and persistent data.
+        </p>
+        <div class="project-links">
+          <a class="button button-primary" href="https://github.com/jasonvandeventer/mana-archive-platform" target="_blank" rel="noopener noreferrer">View Repo</a>
+          <a class="button button-secondary" href="../index.html#contact">Contact Me</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="section section-alt">
+      <div class="container">
+        <p class="section-label">Architecture</p>
+        <h2>What I built</h2>
+        <div class="split">
+          <div>
+            <pre class="diagram"><code>Client
+  ↓
+Traefik Ingress (host: mana.local)
+  ↓
+Service (ClusterIP :80 → targetPort 8501)
+  ↓
+Pod
+  ↓
+Container (Streamlit app on 8501)
+  ↓
+PersistentVolumeClaim mounted at /app/data</code></pre>
+          </div>
+          <div>
+            <ul class="project-bullets">
+              <li>The app runs as a single containerized Streamlit workload</li>
+              <li>Images are built locally and automatically in CI, then published to GHCR</li>
+              <li>Kubernetes pulls the image and runs it in a Deployment</li>
+              <li>Traefik routes requests by hostname through an Ingress rule</li>
+              <li>SQLite data persists across Pod replacement via a PVC</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <p class="section-label">Implementation highlights</p>
+        <div class="cards">
+          <article class="card">
+            <h3>Containerization</h3>
+            <p>Containerized the app with Podman and aligned the runtime to Streamlit’s actual behavior, including correct port exposure and bind address.</p>
+          </article>
+          <article class="card">
+            <h3>Registry workflow</h3>
+            <p>Published images to GitHub Container Registry so build and runtime concerns stay separated. The cluster pulls images instead of building them locally.</p>
+          </article>
+          <article class="card">
+            <h3>Kubernetes delivery</h3>
+            <p>Implemented a minimal, explainable stack: Deployment, Service, and Ingress—without unnecessary sidecars or internal reverse proxies.</p>
+          </article>
+          <article class="card">
+            <h3>Persistence</h3>
+            <p>Mounted a PVC at <code>/app/data</code> so the SQLite database survives Pod recreation. Verified by inserting data, deleting the Pod, and confirming the records remained.</p>
+          </article>
+          <article class="card">
+            <h3>CI/CD</h3>
+            <p>Added GitHub Actions to automatically build and push images to GHCR on pushes to <code>main</code>, creating a real image pipeline instead of a manual-only process.</p>
+          </article>
+          <article class="card">
+            <h3>Debugging</h3>
+            <p>Diagnosed ingress 404 behavior by understanding that Traefik matched on the Host header. Direct IP access failed until the hostname matched the Ingress rule.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="lessons" class="section section-alt">
+      <div class="container narrow">
+        <p class="section-label">Key lessons</p>
+        <h2>What this project taught me</h2>
+        <ul class="project-bullets">
+          <li>Kubernetes does not redeploy a running workload just because an image in the registry changed; the Deployment spec must change or the Pods must restart.</li>
+          <li>Ingress routing depends on the Host header, not just the raw node IP address.</li>
+          <li>PersistentVolume mounts replace the target path inside the container and do not migrate pre-existing in-container data automatically.</li>
+          <li>Keeping development, build, and runtime boundaries clean makes debugging dramatically easier.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <p>© <span id="year"></span> Jason VanDeventer</p>
+      <p><a href="../index.html">Back to home</a></p>
+    </div>
+  </footer>
+
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

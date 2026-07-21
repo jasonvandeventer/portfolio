@@ -3,56 +3,320 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Case Study: k3s → Talos Migration | Jason VanDeventer</title>
-  <meta name="description" content="Engineering case study on a blue/green Kubernetes cluster migration (k3s to Talos) with a simultaneous SQLite-to-PostgreSQL data cutover. Full write-up coming soon." />
-  <meta name="robots" content="noindex" />
+  <title>Case Study: k3s &rarr; Talos Migration | Jason VanDeventer</title>
+  <meta name="description" content="Engineering case study: moving a live application's OS, orchestrator, and database in one blue/green cutover window (k3s+SQLite to Talos+PostgreSQL) with zero data loss and ~2:40 of planned downtime." />
+  <meta property="og:title" content="Case Study: k3s &rarr; Talos Migration" />
+  <meta property="og:description" content="One cutover window, three layers (OS + orchestrator + database), zero data loss." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://vanfreckle.com/case-studies/k3s-talos-migration.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0c1117; --border: #2a3140; --text: #c9d1d9;
-      --text-muted: #8b949e; --text-bright: #e6edf3; --accent: #58a6ff;
+      --bg: #0c1117; --bg-raised: #161b22; --bg-card: #1c2129; --border: #2a3140;
+      --text: #c9d1d9; --text-muted: #8b949e; --text-bright: #e6edf3;
+      --accent: #58a6ff; --green: #3fb950;
       --mono: 'IBM Plex Mono', ui-monospace, monospace;
       --sans: 'Inter', -apple-system, system-ui, sans-serif;
+      --max-w: 820px;
     }
-    body {
-      font-family: var(--sans); background: var(--bg); color: var(--text);
-      line-height: 1.65; -webkit-font-smoothing: antialiased;
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 2rem;
-    }
-    .wrap { max-width: 640px; text-align: center; }
-    .label {
-      font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
-      letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem;
-    }
-    h1 {
-      font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 700;
-      color: var(--text-bright); line-height: 1.25; margin-bottom: 1rem;
-    }
-    p { color: var(--text); margin-bottom: 1.5rem; }
-    .soon {
-      font-family: var(--mono); font-size: 0.85rem; color: var(--text-muted);
-      border: 1px solid var(--border); border-radius: 6px;
-      padding: 0.75rem 1rem; display: inline-block; margin-bottom: 2rem;
-    }
-    a {
-      color: var(--accent); text-decoration: none; font-weight: 600;
-      font-size: 0.9rem; transition: color 0.15s;
-    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); background: var(--bg); color: var(--text);
+      line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent); text-decoration: none; transition: color .15s; }
     a:hover { color: var(--text-bright); }
     a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .nav { max-width: var(--max-w); margin: 0 auto; padding: 1.25rem 1.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border); }
+    .nav-brand { font-family: var(--mono); font-size: .9rem; font-weight: 600;
+      color: var(--text-bright); letter-spacing: -.02em; }
+    .nav-brand span { color: var(--accent); }
+    .nav-back { font-size: .85rem; color: var(--text-muted); font-weight: 500; }
+    .nav-back:hover { color: var(--text-bright); }
+
+    .article { max-width: var(--max-w); margin: 0 auto; padding: 3.5rem 1.5rem 2rem; }
+
+    .article h1 { font-size: clamp(1.6rem, 4vw, 2.35rem); font-weight: 700;
+      color: var(--text-bright); line-height: 1.25; margin-bottom: 1rem; letter-spacing: -.01em; }
+    /* subtitle: the first italic paragraph right after h1 */
+    .article h1 + p { font-size: 1.1rem; color: var(--text-muted); max-width: 46rem;
+      margin-bottom: 1.5rem; }
+    .article h1 + p em { font-style: italic; color: var(--text-muted); }
+
+    .article h2 { font-size: 1.4rem; font-weight: 700; color: var(--text-bright);
+      line-height: 1.3; margin: 2.75rem 0 1rem; padding-top: 2.25rem;
+      border-top: 1px solid var(--border); }
+    .article h3 { font-size: 1.1rem; font-weight: 600; color: var(--text-bright);
+      margin: 1.75rem 0 .75rem; }
+
+    .article p { margin-bottom: 1.15rem; color: var(--text); font-size: 1rem; }
+    .article strong { color: var(--text-bright); font-weight: 600; }
+    .article em { color: var(--text); }
+
+    .article ul, .article ol { margin: 0 0 1.15rem 1.35rem; }
+    .article li { margin-bottom: .5rem; color: var(--text); }
+    .article li::marker { color: var(--accent); }
+
+    .article code { font-family: var(--mono); font-size: .85em; color: var(--text-bright);
+      background: var(--bg-raised); border: 1px solid var(--border);
+      border-radius: 4px; padding: .1rem .35rem; }
+
+    .article hr { border: none; border-top: 1px solid var(--border); margin: 1.75rem 0; }
+
+    .diagram { background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1.5rem; margin: 1.75rem 0; overflow-x: auto; }
+    .diagram pre.mermaid { background: transparent; border: 0; margin: 0;
+      display: flex; justify-content: center; min-width: 640px; }
+    /* caption: the italic paragraph immediately after the diagram */
+    .diagram + p { font-size: .9rem; color: var(--text-muted); text-align: center;
+      max-width: 44rem; margin: -.5rem auto 1.75rem; }
+
+    footer { max-width: var(--max-w); margin: 0 auto; padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border); font-size: .8rem; color: var(--text-muted);
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+    footer a { font-family: var(--mono); }
+
+    @media (max-width: 640px) {
+      .article { padding: 2.5rem 1.25rem 1.5rem; }
+      .diagram { padding: 1rem; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <p class="label">Case Study</p>
-    <h1>Blue/green migration: k3s → Talos, with a live SQLite → PostgreSQL cutover</h1>
-    <p>
-      How a live, user-facing application moved its operating system, orchestrator, and
-      database in a single cutover window — zero data loss, minimal planned downtime.
-    </p>
-    <p class="soon">Full write-up coming soon.</p>
-    <p><a href="/">&larr; Back to vanfreckle.com</a></p>
-  </main>
+  <nav class="nav">
+    <a href="/" class="nav-brand">vanfreckle<span>.com</span></a>
+    <a href="/#projects" class="nav-back">&larr; Projects</a>
+  </nav>
+
+  <article class="article">
+<h1>Migrating a live product's OS, orchestrator, and database in one window — without losing a row</h1>
+<p><em>How I moved a real, user-facing application from k3s-on-Rocky-Linux/SQLite to Talos/PostgreSQL as a single blue/green cutover, with zero data loss and a few minutes of planned downtime.</em></p>
+<hr />
+<p>Most migration war stories are about one layer: a database engine swap, or a Kubernetes
+distribution change, or an OS rebuild. This one moved all three at once — Rocky Linux + k3s +
+SQLite became Talos Linux + upstream Kubernetes + PostgreSQL — in a single cutover window, for a
+web app with real users. The interesting part isn't that it worked; it's <em>why</em> doing all
+three together was the safer choice, and how the cutover was designed so that the failure mode was
+always "nothing happened," never "we lost data."</p>
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+    U(["Users"]) --> CF{{"Cloudflare Tunnel"}}
+
+    subgraph BLUE["BLUE — old stack: k3s on Rocky Linux VMs"]
+        direction TB
+        T["Traefik ingress"] --> AB["Cartarch app"]
+        AB --> SQ[("SQLite on Longhorn")]
+    end
+
+    subgraph GREEN["GREEN — new stack: Talos, cp1-3 + worker1"]
+        direction TB
+        NP["NodePort 30080"] --> AG["Cartarch app"]
+        AG --> PG[("CloudNativePG — PostgreSQL 18, 3 instances")]
+        PG -.->|"continuous WAL + daily base"| R2[("Cloudflare R2")]
+    end
+
+    CF -.->|"before"| T
+    CF ==>|"after: tunnel repoint"| NP
+    SQ -.->|"one-time inert snapshot migration"| PG
+</pre></div>
+<p><em>The whole migration in one view: the Cloudflare Tunnel repoints from blue (k3s + SQLite) to green
+(Talos + CloudNativePG); the database moves exactly once, from an inert SQLite snapshot into
+PostgreSQL. Continuous WAL archiving to R2 is new on green.</em></p>
+<h2>The system, and the failure that forced the move</h2>
+<p>The application is Cartarch, a self-hosted Magic: The Gathering collection manager. It ran on a
+four-VM k3s v1.34.6 cluster (Rocky Linux 9.7) on a single Unraid host, with the app's data in a
+<strong>SQLite file on a Longhorn volume</strong>, fronted by a Cloudflare Tunnel into Traefik.</p>
+<p>The trigger wasn't ambition — it was data loss. Over two days in late May 2026, two filesystem
+corruptions hit: the app's ext4 volume ("Resize inode not valid," May 28) and then Grafana's
+SQLite database ("database disk image is malformed," May 29). The root cause was structural: when a
+stateful pod reschedules, Longhorn detaches and reattaches its volume, and an <em>unclean</em> detach
+leaves a single-writer filesystem inconsistent. Crucially, <strong>Longhorn's replica count does not
+protect against this</strong> — every replica faithfully mirrors the same corrupt bytes. Redundancy at the
+storage layer is not durability at the database layer.</p>
+<p>There was a second, independent problem: after a routine host reboot, the cluster couldn't
+reliably reassemble itself. A VM boot-order and Longhorn-readiness race <em>below</em> the GitOps layer
+left it half-up and needing manual <code>kubectl</code> rescue. A rebuild of the <em>same</em> stack wouldn't fix
+that — it would faithfully reproduce the race.</p>
+<p>So the problem statement was concrete: <em>a product serving real users was losing data to a
+storage/OS failure class that replication couldn't fix, on a cluster that couldn't recover itself
+after a reboot.</em> PostgreSQL solves the first (crash-safe WAL survives unclean shutdown by design);
+Talos solves the second (node lifecycle and boot ordering become platform-managed instead of
+hand-wired). The two fixes pointed at the same move.</p>
+<p>There was one false start worth admitting: a premature PostgreSQL bring-up on the old cluster got
+reverted a day later so the transition could be planned properly. Stepping back cost a day and
+saved a bad foundation.</p>
+<h2>The constraints</h2>
+<p>Before any design, the non-negotiables:</p>
+<ul>
+<li><strong>Real users</strong> (about six at the time). A few minutes of planned downtime was acceptable; data loss was not.</li>
+<li><strong>Exactly one writer at all times.</strong> Old SQLite is the sole writer until cutover; new PostgreSQL after. In between, the migration source is an <strong>inert point-in-time snapshot</strong>, never a live-replicated second writer. No split-brain, ever.</li>
+<li><strong>Zero data loss.</strong> Rollback had to mean "point back at the untouched SQLite; not one write lost."</li>
+<li><strong>The old stack keeps serving the whole time.</strong> Parallel build, no teardown until after a confident cutover.</li>
+<li><strong>Change one major layer per rebuild.</strong> Talos + upstream Kubernetes + PostgreSQL was already a large surface, so <strong>Longhorn was deliberately held constant</strong> — keeping "is it the storage layer?" a question experience could still answer.</li>
+<li><strong>Prove equivalence, don't assume it.</strong> The app was kept engine-agnostic specifically so its test suite could run green on <em>both</em> SQLite and PostgreSQL — behavioural equivalence as a gate, not a hope.</li>
+</ul>
+<h2>Why Talos, and why fold it into the database move</h2>
+<p>Talos Linux is an immutable, API-managed OS with no shell and no package manager — you configure it
+declaratively and it reconciles. That directly addresses the reboot-race failure class: node
+lifecycle, boot ordering, and component readiness stop being hand-wired systemd concerns and become
+platform-managed. OS updates are atomic and roll back cleanly, instead of "dnf update, reboot, and
+pray." And in practice nearly all operations were already <code>kubectl</code> against the API — a
+shell-having host OS was buying very little.</p>
+<p>I considered the alternatives explicitly. <em>Staying on Rocky/k3s</em> didn't address the reboot race and
+kept the hand-wired substrate. <em>Running k3s on Talos</em> made no sense — Talos already provisions
+Kubernetes; layering k3s on top just re-adds the opinionated substitutions (its bundled Traefik,
+its ServiceLB) that upstream Kubernetes avoids.</p>
+<p>Folding the PostgreSQL migration <em>into</em> the cluster rebuild was itself a decision, not an accident.
+The database cutover I needed anyway and the resilient-cutover mechanism I wanted were the same
+move: build a second cluster in parallel, migrate onto it from an inert snapshot, and switch
+traffic when confident. Doing them separately would have meant two risky windows instead of one.</p>
+<p>The target: <strong>Talos v1.13.3</strong> running <strong>Kubernetes v1.35.4</strong> — pinned deliberately below Talos's
+bundled 1.36, which exceeded <strong>Longhorn v1.11.2</strong>'s tested ceiling. Three control-plane nodes
+(stacked etcd, an HA API VIP) plus one worker, all VMs on the one Unraid host. The database is
+<strong>CloudNativePG</strong> running <strong>PostgreSQL 18</strong> as a three-instance cluster (one primary, two replicas
+with pod anti-affinity), with <strong>continuous WAL archiving and daily base backups to Cloudflare R2</strong>
+via the Barman Cloud plugin. Ingress on the new cluster is deliberately minimal — a NodePort with
+cloudflared pointing at it — because the traffic switch is a tunnel repoint, not a load-balancer
+dance.</p>
+<h2>Moving the data safely</h2>
+<p>The migration is a cross-engine conversion (SQLite → PostgreSQL), so streaming replication doesn't
+apply — the source is a snapshot, converted once.</p>
+<p>The first real decision was tooling: I rejected <strong>pgloader</strong>, the obvious choice. Once I'd made
+Alembic the authoritative schema owner, pgloader's core value — schema translation — was gone, and
+what remained actively fought the design. It drops and recreates foreign keys (which would clobber
+the <code>ON DELETE</code> topology I'd carefully recovered), it doesn't topologically sort inserts (a probe
+failed on exactly that: a child row referencing a not-yet-loaded parent), and it's effectively
+unmaintained. The replacement was a short script that loads through the application's <em>own</em>
+SQLAlchemy table definitions, so booleans, timestamps, and cache columns coerce correctly <strong>by
+construction</strong> rather than by guesswork. It loads parent-before-child with foreign-key enforcement
+temporarily off (<code>session_replication_role = replica</code>), then resets every sequence. The guiding
+principle: <strong>the rehearsal artifact and the cutover artifact are the same script</strong> — only the
+connection strings differ.</p>
+<p>The load ran as four ordered, single-shot Kubernetes Jobs, deliberately <em>not</em> wired into a single
+<code>kustomization</code> so they couldn't all fire at once:</p>
+<ol>
+<li><strong>Schema</strong> — <code>alembic upgrade head</code> builds the baseline into the empty database.</li>
+<li><strong>Load</strong> — the SQLite→PostgreSQL copy (28 tables: 21 ORM-managed + 7 raw-SQL).</li>
+<li><strong>Sweep</strong> — remediate known foreign-key orphans per the schema's declared <code>ON DELETE</code> intent.</li>
+<li><strong>Validate</strong> — a hard GO/NO-GO gate (below); exit 0 means go.</li>
+</ol>
+<p>One detail from this stage is the kind of thing that only shows up in a rehearsal. SQLite in WAL
+mode keeps recent writes in a side file; <strong>copying the main database file without first
+checkpointing captures stale, un-flushed data.</strong> That actually bit a verification run and produced
+phantom orphans until I traced it. The fix is to run <code>PRAGMA wal_checkpoint(TRUNCATE)</code> on the
+<em>live</em> pod — and to do it <em>before</em> freezing the app, because a scaled-to-zero pod can't be exec'd
+into. The snapshot's integrity was then chained end to end: <code>PRAGMA integrity_check</code>, plus a SHA-256
+recorded when it left the old pod and re-verified byte-identical after it landed on the new cluster.</p>
+<h2>Schema safety: Alembic as the single owner</h2>
+<p>The schema itself needed hardening before it could survive the engine change. The Alembic baseline
+was autogenerated against SQLite and then <strong>hand-corrected for PostgreSQL</strong>. The most important
+class of fix: boolean <code>server_default</code>s. Autogenerate emits integer literals (<code>0</code>/<code>1</code>), which are
+valid in SQLite but fail outright on PostgreSQL ("column is of type boolean but default is
+integer"). Beyond that, diffing the generated baseline against the <em>live production</em> schema
+recovered eight invariants a pure model-derived baseline would have silently dropped — six foreign-
+key <code>ON DELETE</code> rules and three partial-unique indexes. Reading what was actually running in
+production, not just what the models implied, is what kept those from vanishing.</p>
+<p>Two operational rules make schema changes safe from here on. First, <strong>migrations run before the app
+rolls</strong> — an ArgoCD PreSync hook runs <code>alembic upgrade head</code> ahead of the new pods, so old code
+never meets a schema it doesn't understand. Second, the app <strong>no longer builds schema on
+PostgreSQL</strong> at all; Alembic is the sole owner, with the ORM's <code>create_all</code> gated to the dev/SQLite
+path only. The discipline is <strong>additive, migrate-before-deploy</strong> — new columns land nullable and
+ahead of the code that needs them. (It is not a formal two-phase expand-then-contract process, and
+I don't claim it is.)</p>
+<h2>Cutover and rollback</h2>
+<p>The rollback model was chosen for the user count, not for a whitepaper. At six users, a <strong>full
+write-freeze</strong> was correct: the app is briefly down, nothing writes to either database during the
+window, so aborting means pointing the tunnel back at the untouched SQLite with zero writes lost.
+Dual-write and reverse-sync were explicitly rejected as over-engineering at this scale.</p>
+<p>The traffic switch is a Cloudflare Tunnel repoint — seconds, no DNS TTL to wait on. Before, the
+tunnel targeted the old cluster's Traefik; after, the new cluster's NodePort. Rollback is the same
+edit in reverse.</p>
+<p>The executed sequence: checkpoint and copy the snapshot while the old app is
+still running → freeze the old app (scale to zero) → deliver the snapshot to the new cluster and
+verify its SHA-256 → run the four Jobs (schema, load, sweep, validate-gate) → bring the app up on
+the new cluster → smoke-test through a port-forward → <strong>repoint the tunnel</strong> → smoke-test through
+the tunnel, including a create-and-delete to prove writes land in PostgreSQL.</p>
+<p>The run logs show two entries a few minutes apart, which is worth explaining so it doesn't read as a
+failure: the first was a deliberate <code>--preflight</code> check (verify everything, change nothing, exit);
+the second was the real run, gated on a human typing <code>yes</code>, which ran to completion. <strong>Rollback was
+never used.</strong></p>
+<p>User-facing downtime was <strong>about two minutes and forty seconds</strong> — the interval between freezing the
+old app (scaling it to zero, 14:06:40) and the tunnel repoint completing (14:09:19), per the cutover
+log's timestamps. With only a handful of active users at the time and no formal outage announcement,
+the window passed without anyone reporting an interruption.</p>
+<h2>Proving it worked</h2>
+<p>Two independent validations, one for the code and one for the data.</p>
+<p>For the <strong>code</strong>, the whole point of keeping the app engine-agnostic paid off: the same test suite
+runs against either backend via one environment variable, so a green run on <em>both</em> SQLite and
+PostgreSQL 18 proves behavioural equivalence rather than assuming it. That count grew as fixes
+landed — 263 tests at rehearsal, 278 by the final pre-cutover build, passing on both. A dedicated
+foreign-key harness deserves a mention: it's metadata-driven, so adding a foreign key <em>forces</em> you
+to account for its delete behaviour, and it runs every parent-delete path across both foreign-key
+postures on both backends. On a fresh production pull it found 22 orphaned rows actively accruing,
+and one genuinely dangerous case: a foreign key set to <code>NO ACTION</code> meant that under PostgreSQL's
+enforcement, deleting any user who'd ever recorded a game would abort the entire delete with a
+violation — a crash, not a silent orphan. The fix (change it to <code>SET NULL</code> and snapshot the
+player's name onto the game) went into the baseline before cutover.</p>
+<p>For the <strong>data</strong>, the fourth Job was a five-check GO/NO-GO gate: zero foreign-key orphans; per-table
+row-count parity; a boolean round-trip run through the app's <em>real</em> query path (to catch the 0/1-
+versus-native-boolean hazard end to end); a sequence-collision probe; and a byte-identical round-
+trip of the app's Scryfall cache seam. Only an all-pass returned exit 0.</p>
+<p>And before betting production data on any of it, the backup/restore path was exercised repeatedly —
+a throwaway restore from R2 (objects independently listed with <code>rclone</code>, not trusted from status),
+a fresh cluster recovered from R2 to healthy in about a minute, and a data-fidelity restore on
+cutover morning that matched row counts and preserved booleans exactly.</p>
+<h2>What happened</h2>
+<p>The cutover shipped on June 22, 2026. No rollback, no data loss, and faster than the twenty minutes
+I'd budgeted. The new Talos cluster became the sole production environment and the old k3s stack was
+decommissioned — which also resolved a memory-oversubscription problem that had existed only while
+both clusters ran. The app has run a steady, auto-deployed release train since, with Alembic as the
+sole schema owner via the PreSync hook. The migration didn't just land a database; it left a
+<em>repeatable</em> schema-change process behind it.</p>
+<p>Two rough edges, kept in because they're the truth and they read as judgment rather than polish.
+Standing up three PostgreSQL instances <em>while the old cluster was still running</em> briefly put more
+VM memory in play than the host physically had, starved the host's management plane, and forced a
+hard power-down during the build — with <strong>zero data loss</strong>, because production never moved during
+that phase and the new cluster was still empty. Root cause was honest planning error: I'd sized the
+VMs against scheduling headroom, not host-backable memory. And the day before cutover, an unpinned
+dependency drifted a minor version on rebuild and broke an entire class of routes in production;
+the "pre-existing benign test failures" I'd been waving through turned out to be the suite correctly
+detecting exactly that. I pinned the whole stack and the suite went fully green. The lesson I took:
+<em>a failing test is a hypothesis about a real defect until proven benign.</em> The migration went onto a
+foundation that was, finally, still enough to move.</p>
+<h2>What I'd change at real scale</h2>
+<p>This worked because it's small, and the honest version of the story says so.</p>
+<ul>
+<li><strong>The single-host SPOF is real.</strong> Redundancy here is at the Kubernetes and Longhorn layer, not the hardware layer — one physical host failing takes the product down. It's an accepted risk at this size; at an employer it's a second physical host, redundant networking, or managed infrastructure.</li>
+<li><strong>The cutover pattern doesn't scale.</strong> A full write-freeze is fine for six users and a few minutes. At real scale you'd need logical replication or dual-write with reverse-sync for a genuine zero-downtime cutover, and a backfill-and-verify rather than a single frozen snapshot.</li>
+<li><strong>Single app replica, no connection pooler.</strong> In scope by choice here; at scale it's a multi-replica app, PgBouncer in front of PostgreSQL, and a real HA ingress controller instead of one NodePort and one cloudflared.</li>
+<li><strong>DR is now measured at the data layer, not yet at the disaster layer.</strong> I run a non-destructive restore drill: prod's R2 backup chain is restored into an isolated throwaway cluster and validated against production. The most recent run recovered the full database from object storage in <strong>99 seconds</strong> (single instance, apply-to-healthy) with <strong>effectively zero RPO</strong> — the restore was byte-current with prod (identical schema head, row counts, and latest-transaction timestamp), because WAL archiving is continuous. What's <em>still</em> not drilled is the full-disaster path: rebuilding the cluster from bare metal and then restoring, measured end to end against an RTO target. At an employer that's a scheduled game-day with an SLO, not an aspiration — but "I restore production from backups on a cadence and measure it" is now a fact, not a hope.</li>
+<li><strong>Observability shipped thin.</strong> The new cluster went live with app-metrics scraping deferred. Enterprise-grade means dashboards, alerts, and SLOs <em>before</em> cutover, not after.</li>
+</ul>
+<p>The gap between a personal platform and a production one isn't the parts list — it's the
+redundancy, the rehearsed recovery, and the automation of the human gates. Knowing exactly where
+those gaps are, and why each was an acceptable trade at this size, is the actual deliverable.</p>
+  </article>
+
+  <footer>
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Jason VanDeventer</p>
+    <p><a href="/">vanfreckle.com</a> &middot; <a href="https://github.com/jasonvandeventer/vanfreckle-platform">Platform repo</a></p>
+  </footer>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: { fontFamily: "'IBM Plex Mono', monospace", darkMode: true,
+        background: '#1c2129', primaryColor: '#161b22', primaryBorderColor: '#2a3140',
+        primaryTextColor: '#e6edf3', lineColor: '#58a6ff' }
+    });
+  </script>
 </body>
 </html>

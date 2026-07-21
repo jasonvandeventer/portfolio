@@ -3,188 +3,543 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jason VanDeventer | DevSecOps / Platform Engineer</title>
-  <meta name="description" content="DevSecOps and Platform Engineer focused on Kubernetes, AWS, Linux, CI/CD, and reproducible deployment workflows." />
+  <title>Jason VanDeventer | Platform Engineer &amp; DevSecOps</title>
+  <meta name="description" content="Cleared platform engineer with 14 years in IT operations and systems engineering. Kubernetes, GitOps, AWS GovCloud, DevSecOps. Active Secret clearance." />
+  <meta property="og:title" content="Jason VanDeventer | Platform Engineer" />
+  <meta property="og:description" content="Cleared platform engineer specializing in Kubernetes, GitOps, and DevSecOps in DoD environments." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://vanfreckle.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c1117;
+      --bg-raised: #161b22;
+      --bg-card: #1c2129;
+      --border: #2a3140;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --text-bright: #e6edf3;
+      --accent: #58a6ff;
+      --accent-dim: #1a3a5c;
+      --green: #3fb950;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --max-w: 960px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
+    a:hover { color: var(--text-bright); }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── NAV ── */
+    .nav {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text-bright); }
+
+    /* ── HERO ── */
+    .hero {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 5rem 1.5rem 4rem;
+    }
+    .hero-label {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      color: var(--text-bright);
+      line-height: 1.25;
+      max-width: 700px;
+      margin-bottom: 1.25rem;
+    }
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text);
+      max-width: 620px;
+      margin-bottom: 2rem;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+    .stat-block {}
+    .stat-val {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--green);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.15rem;
+    }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 6px;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .btn-primary:hover { background: #79bbff; color: var(--bg); }
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--text-bright); }
+
+    /* ── SECTIONS ── */
+    .section {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+    }
+
+    /* ── ABOUT ── */
+    .about-text {
+      max-width: 640px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .about-text p + p { margin-top: 1rem; }
+
+    /* ── SKILLS ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .skill-group h3 {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+    .skill-group ul {
+      list-style: none;
+      font-size: 0.9rem;
+    }
+    .skill-group li {
+      padding: 0.25rem 0;
+      color: var(--text);
+    }
+
+    /* ── PROJECTS ── */
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .project-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 0.25rem;
+    }
+    .project-card .project-meta {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .project-card .project-meta a { color: var(--accent); }
+    .project-desc {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+    .project-highlights {
+      list-style: none;
+      font-size: 0.85rem;
+    }
+    .project-highlights li {
+      padding: 0.3rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+      color: var(--text);
+    }
+    .project-highlights li::before {
+      content: '·';
+      position: absolute;
+      left: 0.25rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .project-links {
+      margin-top: 1.25rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── EXPERIENCE ── */
+    .exp-entry { margin-bottom: 2rem; }
+    .exp-entry:last-child { margin-bottom: 0; }
+    .exp-entry h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .exp-meta {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .exp-entry p {
+      font-size: 0.9rem;
+      color: var(--text);
+      max-width: 600px;
+    }
+
+    /* ── CERTS ── */
+    .cert-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .cert-chip {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      background: var(--bg-raised);
+    }
+
+    /* ── CONTACT ── */
+    .contact-grid {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .contact-grid a {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      .nav-links { gap: 1rem; }
+      .nav-links a { font-size: 0.8rem; }
+      .hero { padding: 3rem 1.25rem 2.5rem; }
+      .hero-stats { gap: 1.5rem; }
+      .section { padding: 3rem 1.25rem; }
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      footer { flex-direction: column; gap: 0.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container nav">
-      <a href="index.html" class="brand">vanfreckle<span>.com</span></a>
-      <nav>
-        <a href="#about">About</a>
-        <a href="#skills">Skills</a>
-        <a href="#projects">Projects</a>
-        <a href="#experience">Experience</a>
-        <a href="#contact">Contact</a>
-      </nav>
+
+  <nav class="nav">
+    <a href="/" class="nav-brand">vanfreckle<span>.com</span></a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
     </div>
-  </header>
+  </nav>
 
-  <main>
-    <section class="hero">
-      <div class="container hero-grid">
-        <div>
-          <p class="eyebrow">DevSecOps / Platform Engineer</p>
-          <h1>I build and deploy containerized applications using Kubernetes, CI/CD, and cloud infrastructure.</h1>
-          <p class="lede">
-            I work across AWS, Linux, Kubernetes, and CI/CD with a focus on clean boundaries:
-            development on the workstation, artifacts in the registry, and runtime in the cluster.
-          </p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="projects/mana-archive.html">View Featured Project</a>
-            <a class="button button-secondary" href="#contact">Get in Touch</a>
-          </div>
-          <ul class="signal-list">
-            <li>Kubernetes Deployment + Service + Ingress (Traefik)</li>
-            <li>CI/CD pipeline → GitHub Actions → GHCR</li>
-            <li>Persistent storage via PVC (SQLite)</li>
-          </ul>
-        </div>
-        <aside class="hero-card">
-          <h2>Current focus</h2>
-          <ul>
-            <li>Platform engineering patterns</li>
-            <li>Kubernetes application delivery</li>
-            <li>Reproducible deployment workflows</li>
-            <li>Operational clarity over complexity</li>
-          </ul>
-          <div class="mini-grid">
-            <div>
-              <span class="stat">3+</span>
-              <span class="stat-label">years in DoD / Gov environments</span>
-            </div>
-            <div>
-              <span class="stat">Active</span>
-              <span class="stat-label">Secret Clearance</span>
-            </div>
-          </div>
-        </aside>
+  <section class="hero">
+    <p class="hero-label">Platform Engineer / DevSecOps</p>
+    <h1>Cleared platform engineer building and operating Kubernetes infrastructure in DoD environments.</h1>
+    <p class="hero-sub">
+      14 years in IT operations and systems engineering. Professional experience across
+      Department of the Army and Department of the Air Force programs in AWS GovCloud.
+      Independently own and operate a live Kubernetes platform with GitOps, a full CI/CD
+      release pipeline, and verified backup/restore.
+    </p>
+    <div class="hero-stats">
+      <div class="stat-block">
+        <span class="stat-val">14 yr</span>
+        <span class="stat-label">IT &amp; systems engineering</span>
       </div>
-    </section>
-
-    <section id="about" class="section">
-      <div class="container narrow">
-        <p class="section-label">About</p>
-        <h2>DevSecOps engineer building toward platform engineering through real systems.</h2>
-        <p>
-          My background is in AWS GovCloud, Linux administration, CI/CD, and regulated infrastructure.
-          I’ve provisioned multi-node RHEL environments with CloudFormation, prepared systems for Kubernetes workloads,
-          configured EBS and NFS storage, and worked within STIG and change-control constraints.
-        </p>
-        <p>
-          More recently, I’ve been focused on owning the application lifecycle end-to-end: local runtime, containerization,
-          image distribution, Kubernetes delivery, ingress, and persistence. I care less about collecting tools and more about
-          understanding how each layer behaves when it breaks.
-        </p>
+      <div class="stat-block">
+        <span class="stat-val">Active</span>
+        <span class="stat-label">Secret clearance</span>
       </div>
-    </section>
-
-    <section id="skills" class="section section-alt">
-      <div class="container">
-        <p class="section-label">Skills</p>
-        <h2>Core technologies</h2>
-        <div class="chips">
-          <span>AWS GovCloud</span>
-          <span>CloudFormation</span>
-          <span>Kubernetes (K3s)</span>
-          <span>Linux / RHEL</span>
-          <span>GitHub Actions</span>
-          <span>GHCR</span>
-          <span>Podman / Docker</span>
-          <span>CI/CD</span>
-          <span>Python</span>
-          <span>Bash</span>
-          <span>EBS / NFS</span>
-          <span>Traefik</span>
-          <span>SQLite</span>
-          <span>Networking</span>
-          <span>STIG hardening</span>
-        </div>
+      <div class="stat-block">
+        <span class="stat-val">900+</span>
+        <span class="stat-label">automated tests</span>
       </div>
-    </section>
-
-    <section id="projects" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <p class="section-label">Featured project</p>
-            <h2>Mana Archive Platform</h2>
-          </div>
-          <a class="text-link" href="projects/mana-archive.html">Read full case study →</a>
-        </div>
-
-        <article class="project-card">
-          <div class="project-copy">
-            <p class="project-summary">
-              A Kubernetes-deployed application with CI/CD, ingress routing, and persistent storage, built to understand the full lifecycle from local development to cluster runtime.
-            </p>
-            <ul class="project-bullets">
-              <li>Containerized the app with Podman and published images to GitHub Container Registry</li>
-              <li>Deployed with Kubernetes Deployment, Service, and Traefik Ingress using host-based routing</li>
-              <li>Mounted a PersistentVolumeClaim at <code>/app/data</code> so SQLite data survives Pod recreation</li>
-              <li>Automated image builds and publishing with GitHub Actions</li>
-            </ul>
-            <div class="project-links">
-              <a class="button button-secondary" href="projects/mana-archive.html">Case Study</a>
-              <a class="button button-secondary" href="https://github.com/jasonvandeventer/mana-archive-platform" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
-            </div>
-          </div>
-          <div class="code-panel">
-<pre><code>Client → Traefik Ingress → Service → Pod → Container → App
-                                      ↓
-                               PersistentVolumeClaim</code></pre>
-          </div>
-        </article>
+      <div class="stat-block">
+        <span class="stat-val">2:40</span>
+        <span class="stat-label">cutover downtime</span>
       </div>
-    </section>
-
-    <section id="experience" class="section section-alt">
-      <div class="container">
-        <p class="section-label">Experience snapshot</p>
-        <h2>Work that maps to the project</h2>
-        <div class="timeline">
-          <article>
-            <h3>DevSecOps Engineer — HumanIT Solutions</h3>
-            <p class="meta">Oct 2025 – Present</p>
-            <p>Provision AWS GovCloud infrastructure with CloudFormation, prepare RHEL systems for Kubernetes workloads, configure EBS/NFS storage, and operate within compliance-driven environments.</p>
-          </article>
-          <article>
-            <h3>DevOps Engineer — Clarity</h3>
-            <p class="meta">Nov 2022 – Jun 2025</p>
-            <p>Managed GitLab CI/CD, AWS GovCloud IAM, Bash automation, and platform operations inside a classified DoD contractor environment.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="contact" class="section">
-      <div class="container contact-card">
-        <div>
-          <p class="section-label">Contact</p>
-          <h2>Want the résumé, repo links, or a technical walkthrough?</h2>
-          <p>I’m targeting DevOps / Platform Engineering roles where I can build internal platforms, improve delivery workflows, and own systems end-to-end.</p>
-        </div>
-        <div class="contact-links">
-          <a href="mailto:jasonvandeventer@gmail.com">jasonvandeventer@gmail.com</a>
-          <a href="https://github.com/jasonvandeventer" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="https://www.linkedin.com/in/jasonvandeventer/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-          <a href="resume/Jason_VanDeventer_Resume.pdf" target="_blank">Download Resume</a>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-grid">
-      <p>© <span id="year"></span> Jason VanDeventer</p>
-      <p>Built for clarity, not fluff.</p>
     </div>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#projects">View Projects</a>
+      <a class="btn btn-outline" href="resume/Jason_VanDeventer_Resume.pdf" target="_blank">Resume (PDF)</a>
+      <a class="btn btn-outline" href="#contact">Contact</a>
+    </div>
+  </section>
+
+  <section id="about" class="section">
+    <p class="section-label">About</p>
+    <h2>Platform engineering grounded in production operations.</h2>
+    <div class="about-text">
+      <p>
+        I work in AWS GovCloud performing STIG compliance assessments, ACAS vulnerability scanning,
+        and CUI handling in IL-4 and IL-5 environments, supporting systems under active ATO and
+        NIST 800-53 governance.
+      </p>
+      <p>
+        Outside of work, I own and operate a live Kubernetes platform (Talos Linux) with ArgoCD
+        GitOps, serving real users in production. The platform has been through a zero-data-loss
+        blue/green cluster migration, multiple schema migrations, and a structurally resolved
+        production incident with a published postmortem. I care about release safety, verified
+        backups, and knowing exactly where the gaps are.
+      </p>
+    </div>
+  </section>
+
+  <section id="skills" class="section">
+    <p class="section-label">Skills</p>
+    <h2>Core technologies</h2>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <h3>Platforms</h3>
+        <ul>
+          <li>Kubernetes (Talos, k0s)</li>
+          <li>ArgoCD / GitOps</li>
+          <li>AWS GovCloud</li>
+          <li>CloudFormation</li>
+        </ul>
+      </div>
+      <div class="skill-group">
+        <h3>CI/CD &amp; Automation</h3>
+        <ul>
+          <li>GitHub Actions</li>
+          <li>GitLab CI/CD</li>
+          <li>Bash / Python</li>
+          <li>Alembic</li>
+        </ul>
+      </div>
+      <div class="skill-group">
+        <h3>Security &amp; Compliance</h3>
+        <ul>
+          <li>STIG Viewer / RHEL</li>
+          <li>ACAS scanning</li>
+          <li>NIST 800-63B</li>
+          <li>CUI handling</li>
+        </ul>
+      </div>
+      <div class="skill-group">
+        <h3>Data &amp; Infrastructure</h3>
+        <ul>
+          <li>PostgreSQL (CNPG)</li>
+          <li>RHEL 9 / Linux</li>
+          <li>Longhorn / NFS</li>
+          <li>Cloudflare / DNS / TLS</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="certs" class="section">
+    <p class="section-label">Certifications</p>
+    <h2>Active credentials</h2>
+    <div class="cert-list">
+      <span class="cert-chip">CompTIA SecurityX (2023)</span>
+      <span class="cert-chip">AWS Solutions Architect Associate (2025)</span>
+      <span class="cert-chip">CompTIA Security+ (2023)</span>
+      <span class="cert-chip">CompTIA A+ (2005)</span>
+    </div>
+  </section>
+
+  <section id="projects" class="section">
+    <p class="section-label">Projects</p>
+    <h2>What I build and operate</h2>
+
+    <div class="project-card">
+      <h3>Cartarch</h3>
+      <p class="project-meta">
+        FastAPI / PostgreSQL / Kubernetes
+        · <a href="https://github.com/jasonvandeventer/cartarch" target="_blank" rel="noopener">GitHub</a>
+      </p>
+      <p class="project-desc">
+        Full-stack MTG collection and deck management platform running in production on
+        Kubernetes with real users since v1.
+      </p>
+      <ul class="project-highlights">
+        <li>Full CI/CD release pipeline: tag, build, publish, ArgoCD Image Updater promotion,
+            PreSync Alembic migration hooks, and post-deploy verify/soak</li>
+        <li>900+ automated tests with CI release-record guard preventing unverified deployments</li>
+        <li>CloudNativePG PostgreSQL with WAL archiving to R2; backup chain verified through
+            full restore drills (99s recovery, effectively zero RPO)</li>
+        <li>OAuth-gated service exposure behind Cloudflare Access with auth flows aligned to
+            NIST SP 800-63B</li>
+        <li>Root-caused and structurally prevented a production availability incident;
+            postmortem documented</li>
+        <li>Self-hosted image mirror (525,000+ card images) with daily automated price ingest</li>
+      </ul>
+      <div class="project-links">
+        <a class="btn btn-outline" href="case-studies/k3s-talos-migration.html">Migration Case Study</a>
+        <a class="btn btn-outline" href="https://github.com/jasonvandeventer/cartarch" target="_blank" rel="noopener">Source Code</a>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <h3>Kubernetes Platform (Talos)</h3>
+      <p class="project-meta">
+        Talos Linux / ArgoCD / Longhorn
+        · <a href="https://github.com/jasonvandeventer/vanfreckle-platform" target="_blank" rel="noopener">GitHub</a>
+      </p>
+      <p class="project-desc">
+        Multi-node Talos Kubernetes cluster with ArgoCD GitOps managing 10+ applications,
+        all Synced/Healthy.
+      </p>
+      <ul class="project-highlights">
+        <li>Blue/green cluster migration from k3s to Talos with simultaneous SQLite-to-PostgreSQL
+            data migration, zero data loss, minimal planned downtime</li>
+        <li>HA control plane (3 stacked-etcd nodes) with API VIP</li>
+        <li>Longhorn distributed storage on enterprise SSDs; Cloudflare DNS and TLS termination</li>
+        <li>Vaultwarden, Obsidian MCP, and Cartarch MCP deployed with Cloudflare Access
+            and Managed OAuth</li>
+      </ul>
+      <div class="project-links">
+        <a class="btn btn-outline" href="https://github.com/jasonvandeventer/vanfreckle-platform" target="_blank" rel="noopener">Source Code</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="section">
+    <p class="section-label">Experience</p>
+    <h2>Professional background</h2>
+
+    <div class="exp-entry">
+      <h3>DevSecOps Engineer</h3>
+      <p class="exp-meta">HumanIT Solutions (DAF Program) · Oct 2025 - Present · Remote</p>
+      <p>AWS GovCloud infrastructure with CloudFormation, RHEL/k0s deployment, STIG compliance
+         assessments (RHEL 9, STIG Viewer), ACAS scanning, CUI handling in IL-4/IL-5 environments.</p>
+    </div>
+
+    <div class="exp-entry">
+      <h3>DevOps Engineer</h3>
+      <p class="exp-meta">Clarity (Department of the Army Program) · Nov 2022 - Jun 2025 · Remote</p>
+      <p>GitLab CI/CD, AWS GovCloud IAM, Bash automation, and platform operations in a classified
+         DoD contractor environment under active ATO and NIST 800-53 governance. Position eliminated
+         due to program funding reductions.</p>
+    </div>
+
+    <div class="exp-entry">
+      <h3>Earlier roles</h3>
+      <p class="exp-meta">2012 - 2022</p>
+      <p>IT Support (L3Harris, classified DoD facility), AV/Simulation systems (Ascension St. John),
+         field engineering (NCR), Tier 2 support (Open Options, PACS/SQL Server).
+         <a href="resume/Jason_VanDeventer_Resume.pdf" target="_blank">Full resume</a>.</p>
+    </div>
+  </section>
+
+  <section id="contact" class="section">
+    <p class="section-label">Contact</p>
+    <h2>Open to remote Platform Engineer, DevSecOps, and SRE roles.</h2>
+    <div class="contact-grid">
+      <a href="mailto:jason@vanfreckle.com">jason@vanfreckle.com</a>
+      <a href="tel:918-500-6414">918-500-6414</a>
+      <a href="https://github.com/jasonvandeventer" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/jasonvandeventer/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="resume/Jason_VanDeventer_Resume.pdf" target="_blank">Resume (PDF)</a>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; <script>document.write(new Date().getFullYear())</script> Jason VanDeventer</p>
   </footer>
 
-  <script src="assets/js/main.js"></script>
 </body>
 </html>
